@@ -1,39 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import LightButton from "../../assets/website/light-mode-button.png";
 import DarkButton from "../../assets/website/dark-mode-button.png";
 
 const DarkMode = () => {
-  const [theme, setTheme] = React.useState(
-    localStorage.getItem("theme") ? localStorage.getItem("theme") : "light"
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || "light"
   );
 
-  const element = document.documentElement; // html element
+  useEffect(() => {
+    const root = document.documentElement;
 
-  React.useEffect(() => {
     if (theme === "dark") {
-      element.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      root.classList.add("dark");
+      document.body.style.backgroundColor = "#1e293b"; // Dark mode background
     } else {
-      element.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      root.classList.remove("dark");
+      document.body.style.backgroundColor = "#f9fafb"; // Light mode background
     }
+
+    localStorage.setItem("theme", theme);
   }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   return (
     <div className="relative">
       <img
-        src={LightButton}
-        alt=""
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className={`w-12 cursor-pointer drop-shadow-[1px_1px_1px_rgba(0,0,0,0.1)] transition-all duration-300 absolute right-0 z-10 ${
-          theme === "dark" ? "opacity-0" : "opacity-100"
-        } `}
-      />
-      <img
-        src={DarkButton}
-        alt=""
-        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-        className="w-12 cursor-pointer drop-shadow-[1px_1px_1px_rgba(0,0,0,0.1)] transition-all duration-300"
+        src={theme === "light" ? LightButton : DarkButton}
+        alt={`${theme === "light" ? "Enable dark mode" : "Enable light mode"}`}
+        onClick={toggleTheme}
+        className="w-12 cursor-pointer drop-shadow transition-all duration-300"
       />
     </div>
   );
