@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoMdSearch } from "react-icons/io";
 import { FaCartShopping } from "react-icons/fa6";
 import { FaCaretDown } from "react-icons/fa";
@@ -6,61 +6,50 @@ import DarkMode from "./DarkMode";
 import { FiShoppingBag } from "react-icons/fi";
 
 const Menu = [
-  {
-    id: 1,
-    name: "Home",
-    link: "/#",
-  },
-  {
-    id: 2,
-    name: "Top Rated",
-    link: "/#services",
-  },
-  {
-    id: 3,
-    name: "Kids Wear",
-    link: "/#",
-  },
-  {
-    id: 4,
-    name: "Mens Wear",
-    link: "/#",
-  },
-  {
-    id: 5,
-    name: "Electronics",
-    link: "/#",
-  },
+  { id: 1, name: "Home", link: "/#" },
+  { id: 2, name: "Top Rated", link: "/#services" },
+  { id: 3, name: "Kids Wear", link: "/#" },
+  { id: 4, name: "Mens Wear", link: "/#" },
+  { id: 5, name: "Electronics", link: "/#" },
 ];
 
 const DropdownLinks = [
-  {
-    id: 1,
-    name: "Trending Products",
-    link: "/#",
-  },
-  {
-    id: 2,
-    name: "Best Selling",
-    link: "/#",
-  },
-  {
-    id: 3,
-    name: "Top Rated",
-    link: "/#",
-  },
+  { id: 1, name: "Trending Products", link: "/#" },
+  { id: 2, name: "Best Selling", link: "/#" },
+  { id: 3, name: "Top Rated", link: "/#" },
 ];
 
 const Navbar = ({ handleOrderPopup }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef();
+
+  // Close menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen]);
+
+  // Toggle menu with keyboard (Enter or Space)
+  const handleHamburgerKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setMobileMenuOpen((prev) => !prev);
+    }
+  };
 
   return (
     <>
-      {/* Overlay when mobile menu is open */}
+      {/* Overlay */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 z-30"
           onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -83,7 +72,7 @@ const Navbar = ({ handleOrderPopup }) => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="w-[200px] sm:w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-lg border border-gray-300 py-1 px-2
+                  className="w-[200px] group-hover:w-[300px] transition-all duration-300 rounded-lg border border-gray-300 py-1 px-2
                     text-sm focus:outline-none focus:border-1 focus:border-primary dark:border-gray-500 dark:bg-slate-800"
                 />
                 <IoMdSearch className="text-slate-800 group-hover:text-primary absolute top-1/2 -translate-y-1/2 right-3" />
@@ -100,15 +89,17 @@ const Navbar = ({ handleOrderPopup }) => {
                 <FaCartShopping className="text-xl text-white drop-shadow-sm cursor-pointer" />
               </button>
 
-              {/* Darkmode Switch */}
-              <div>
-                <DarkMode />
-              </div>
+              {/* Dark Mode Toggle */}
+              <DarkMode />
 
-              {/* Hamburger menu (sm only) */}
+              {/* Hamburger menu button */}
               <div className="sm:hidden flex items-center">
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  onKeyDown={handleHamburgerKeyDown}
+                  aria-label="Toggle mobile menu"
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="mobile-navigation"
                   className="text-2xl text-primary focus:outline-none"
                 >
                   <svg
@@ -135,7 +126,7 @@ const Navbar = ({ handleOrderPopup }) => {
           </div>
         </div>
 
-        {/* lower Navbar (Desktop Only) */}
+        {/* Desktop Navbar */}
         <div data-aos="zoom-in" className="sm:flex hidden justify-center">
           <ul className="flex items-center gap-4">
             {Menu.map((data) => (
@@ -148,8 +139,6 @@ const Navbar = ({ handleOrderPopup }) => {
                 </a>
               </li>
             ))}
-
-            {/* Dropdown */}
             <li className="group relative cursor-pointer">
               <a href="#" className="flex items-center gap-[2px] py-2">
                 Trending Products
@@ -173,8 +162,11 @@ const Navbar = ({ handleOrderPopup }) => {
           </ul>
         </div>
 
-        {/* Mobile Menu Drawer */}
+        {/* Mobile Navigation */}
         <div
+          ref={mobileMenuRef}
+          id="mobile-navigation"
+          role="navigation"
           className={`sm:hidden fixed top-0 left-0 w-3/4 h-full bg-white dark:bg-slate-800 z-50 transform ${
             mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-in-out shadow-lg`}
@@ -187,6 +179,7 @@ const Navbar = ({ handleOrderPopup }) => {
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="text-2xl text-primary"
+              aria-label="Close mobile menu"
             >
               ✕
             </button>
